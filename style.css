@@ -31,7 +31,7 @@ p{color:#000b65;text-shadow:1px 1px 2px #fff;}
 .amthltg p{animation:amthltg 10s linear infinite;font-size:14px;margin-top:20px;}
 @keyframes amthltg{0%{transform:translate(0,0)}100%{transform:translate(0,-100%)}}
 
-.sm-ttle,.flyr24,.f-pti h3,.oc-fg h4,.liv-rslt h4{background:#ff00a2;padding:5px 10px;text-shadow:1px 1px 2px #000;display:block;color:#fff8f8;margin-bottom:5px;letter-spacing:1px;font-weight:700;border:2px solid #fff;border-radius:.75em;}
+.sm-ttle,.flyr24,.f-pti h3,.oc-fg h4,.liv-rslt h4{background:#7c4066;padding:5px 10px;text-shadow:1px 1px 2px #000;display:block;color:#fff8f8;margin-bottom:5px;letter-spacing:1px;font-weight:700;border:2px solid #fff;border-radius:.75em;}
 
 .lv-mc .h8{display:block;font-size:22px;color:#00094d;text-shadow:1px 1px 2px #fff;}
 .lv-mc .h8:not(:first-child){display:block;border-top:1px solid #ff0020;margin-top:5px;}
