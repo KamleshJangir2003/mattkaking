@@ -3,64 +3,106 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= $pageTitle ?? 'Admin' ?> - Crazy King</title>
+<title><?= $pageTitle ?? 'Admin' ?> - Crazy King Admin</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
+:root{
+  --primary:#6c2d7e;--primary-dark:#4a1d57;--primary-light:#9b4db5;
+  --accent:#ff6b35;--accent2:#ffcc00;
+  --bg:#f0f2f8;--sidebar-bg:#1e1035;
+  --card:#fff;--text:#2d2d2d;--muted:#888;
+  --green:#00b894;--red:#e84393;--blue:#0984e3;--orange:#e67e22;
+  --sidebar-width:250px;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#f5f5f5;font-family:Helvetica,sans-serif;}
-.topbar{background:#1a0030;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;}
-.topbar h1{font-size:18px;color:#ffcc00;}
-.topbar a{color:#ffcc00;text-decoration:none;font-size:13px;margin-left:8px;}
-.topbar a:hover{color:#fff;}
-.navbar{background:#7c4066;display:flex;flex-wrap:wrap;gap:2px;padding:5px 10px;}
-.navbar a{color:#fff;text-decoration:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:700;}
-.navbar a:hover,.navbar a.active{background:#ff0016;}
-.container{padding:20px;max-width:1100px;margin:0 auto;}
-.card{background:#fff;border-radius:10px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.1);}
-.card h3{color:#7c4066;margin-bottom:15px;font-size:18px;border-bottom:2px solid #f0f0f0;padding-bottom:8px;}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px;margin-bottom:20px;}
-.stat-box{background:#fff;border-radius:10px;padding:18px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1);border-top:4px solid #7c4066;}
-.stat-box h2{font-size:28px;color:#1a0030;}
-.stat-box p{font-size:13px;color:#666;margin-top:4px;}
-.stat-box.green{border-color:#28a745;}.stat-box.red{border-color:#ff0016;}.stat-box.blue{border-color:#007bff;}.stat-box.orange{border-color:#ff9800;}
-table{width:100%;border-collapse:collapse;}
-th,td{padding:10px 12px;text-align:left;font-size:13px;border-bottom:1px solid #eee;}
-th{background:#f0e8f4;color:#7c4066;font-weight:700;}
-tr:hover{background:#fafafa;}
-.btn{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;text-decoration:none;display:inline-block;}
-.btn-primary{background:#7c4066;color:#fff;}.btn-primary:hover{background:#5a2e4a;}
-.btn-success{background:#28a745;color:#fff;}.btn-danger{background:#ff0016;color:#fff;}
-.btn-warning{background:#ff9800;color:#fff;}.btn-info{background:#007bff;color:#fff;}
-.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-.badge-active,.badge-won{background:#d4edda;color:#155724;}
-.badge-blocked,.badge-lost{background:#f8d7da;color:#721c24;}
-.badge-pending{background:#fff3cd;color:#856404;}
-.badge-inactive{background:#e2e3e5;color:#383d41;}
-.form-group{margin-bottom:15px;}
-.form-group label{display:block;font-size:13px;font-weight:700;color:#333;margin-bottom:5px;}
-.form-group input,.form-group select{width:100%;padding:9px 12px;border:2px solid #ddd;border-radius:8px;font-size:14px;}
-.form-group input:focus,.form-group select:focus{border-color:#7c4066;outline:none;}
-.alert{padding:12px 15px;border-radius:8px;margin-bottom:15px;font-size:14px;}
-.alert-success{background:#d4edda;color:#155724;}.alert-danger{background:#f8d7da;color:#721c24;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
-@media(max-width:600px){.form-row{grid-template-columns:1fr;}.navbar a{padding:5px 8px;font-size:12px;}}
+body{background:var(--bg);font-family:'Segoe UI',Helvetica,sans-serif;color:var(--text);display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-width);background:var(--sidebar-bg);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;transition:.3s;}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px;}
+.sidebar-logo .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),var(--primary-light));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.sidebar-logo h2{color:#fff;font-size:16px;font-weight:800;letter-spacing:.5px;}
+.sidebar-logo span{color:var(--accent2);font-size:11px;display:block;font-weight:400;}
+.sidebar-menu{flex:1;padding:15px 0;overflow-y:auto;}
+.menu-label{color:rgba(255,255,255,.3);font-size:10px;font-weight:700;letter-spacing:1.5px;padding:12px 20px 6px;text-transform:uppercase;}
+.sidebar-menu a{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.7);text-decoration:none;font-size:13.5px;font-weight:600;transition:.2s;border-left:3px solid transparent;margin:1px 0;}
+.sidebar-menu a:hover{background:rgba(255,255,255,.07);color:#fff;}
+.sidebar-menu a.active{background:linear-gradient(90deg,rgba(108,45,126,.5),rgba(108,45,126,.1));color:#fff;border-left:3px solid var(--accent2);}
+.sidebar-menu a i{width:18px;text-align:center;font-size:14px;}
+.sidebar-footer{padding:15px 20px;border-top:1px solid rgba(255,255,255,.08);}
+.sidebar-footer a{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.6);text-decoration:none;font-size:13px;padding:8px;border-radius:8px;transition:.2s;}
+.sidebar-footer a:hover{background:rgba(255,0,0,.15);color:#ff6b6b;}
+
+/* MAIN */
+.main-wrap{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:#fff;padding:14px 25px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,.06);position:sticky;top:0;z-index:50;}
+.topbar-left h3{font-size:18px;font-weight:800;color:var(--primary-dark);}
+.topbar-left p{font-size:12px;color:var(--muted);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:15px;}
+.admin-badge{display:flex;align-items:center;gap:10px;background:var(--bg);padding:8px 14px;border-radius:30px;}
+.admin-badge .av{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;}
+.admin-badge span{font-size:13px;font-weight:700;color:var(--primary-dark);}
+.topbar-btn{padding:8px 16px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:6px;}
+.topbar-btn:hover{opacity:.9;}
+.main-content{padding:25px;flex:1;}
+
+/* MOBILE */
+.menu-toggle{display:none;background:none;border:none;font-size:22px;color:var(--primary);cursor:pointer;}
+@media(max-width:768px){
+  .sidebar{left:-var(--sidebar-width);transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main-wrap{margin-left:0;}
+  .menu-toggle{display:block;}
+  .main-content{padding:15px;}
+}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <h1>👑 CRAZY KING ADMIN</h1>
-  <div>
-    <span style="font-size:13px;">Hello, <?= htmlspecialchars($_SESSION['admin_user']) ?></span>
-    <a href="logout.php">Logout</a>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">👑</div>
+    <div>
+      <h2>CRAZY KING</h2>
+      <span>Admin Panel</span>
+    </div>
   </div>
-</div>
-<div class="navbar">
-  <a href="dashboard.php" <?= basename($_SERVER['PHP_SELF'])=='dashboard.php'?'class="active"':'' ?>>Dashboard</a>
-  <a href="markets.php" <?= basename($_SERVER['PHP_SELF'])=='markets.php'?'class="active"':'' ?>>Markets</a>
-  <a href="results.php" <?= basename($_SERVER['PHP_SELF'])=='results.php'?'class="active"':'' ?>>Results</a>
-  <a href="bets.php" <?= basename($_SERVER['PHP_SELF'])=='bets.php'?'class="active"':'' ?>>Bets</a>
-  <a href="users.php" <?= basename($_SERVER['PHP_SELF'])=='users.php'?'class="active"':'' ?>>Users</a>
-  <a href="deposits.php" <?= basename($_SERVER['PHP_SELF'])=='deposits.php'?'class="active"':'' ?>>Deposits</a>
-  <a href="win_ratios.php" <?= basename($_SERVER['PHP_SELF'])=='win_ratios.php'?'class="active"':'' ?>>Win Ratios</a>
-  <a href="../index.html" target="_blank">View Site</a>
-</div>
-<div class="container">
+  <nav class="sidebar-menu">
+    <div class="menu-label">Main</div>
+    <a href="dashboard.php" <?= basename($_SERVER['PHP_SELF'])=='dashboard.php'?'class="active"':'' ?>><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <div class="menu-label">Management</div>
+    <a href="markets.php" <?= basename($_SERVER['PHP_SELF'])=='markets.php'?'class="active"':'' ?>><i class="fas fa-store"></i> Markets</a>
+    <a href="results.php" <?= basename($_SERVER['PHP_SELF'])=='results.php'?'class="active"':'' ?>><i class="fas fa-trophy"></i> Results</a>
+    <a href="bets.php" <?= basename($_SERVER['PHP_SELF'])=='bets.php'?'class="active"':'' ?>><i class="fas fa-dice"></i> Bets</a>
+    <a href="users.php" <?= basename($_SERVER['PHP_SELF'])=='users.php'?'class="active"':'' ?>><i class="fas fa-users"></i> Users</a>
+    <div class="menu-label">Finance</div>
+    <a href="deposits.php" <?= basename($_SERVER['PHP_SELF'])=='deposits.php'?'class="active"':'' ?>><i class="fas fa-wallet"></i> Deposits</a>
+    <a href="win_ratios.php" <?= basename($_SERVER['PHP_SELF'])=='win_ratios.php'?'class="active"':'' ?>><i class="fas fa-percent"></i> Win Ratios</a>
+    <div class="menu-label">Site</div>
+    <a href="../index.html" target="_blank"><i class="fas fa-external-link-alt"></i> View Site</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN WRAPPER -->
+<div class="main-wrap">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+      <div class="topbar-left">
+        <h3><?= $pageTitle ?? 'Dashboard' ?></h3>
+        <p><?= date('l, d F Y') ?></p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="admin-badge">
+        <div class="av"><?= strtoupper(substr($_SESSION['admin_user'],0,1)) ?></div>
+        <span><?= htmlspecialchars($_SESSION['admin_user']) ?></span>
+      </div>
+      <a href="logout.php" class="topbar-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </div>
+  <div class="main-content">
