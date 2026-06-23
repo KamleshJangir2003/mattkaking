@@ -55,6 +55,7 @@ body{background:#ffaa33;font-family:Helvetica,sans-serif;font-weight:700;font-st
 .badge-won{background:#d4edda;color:#155724;}
 .badge-lost{background:#f8d7da;color:#721c24;}
 .badge-pending{background:#fff3cd;color:#856404;}
+.badge-cancelled{background:#e9ecef;color:#6c757d;}
 .badge-active{background:#d4edda;color:#155724;}
 .badge-blocked{background:#f8d7da;color:#721c24;}
 

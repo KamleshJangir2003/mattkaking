@@ -5,7 +5,13 @@ $msg = ''; $msg_type = 'success';
 
 if (isset($_POST['declare'])) {
     $market_id = (int)$_POST['market_id'];
-    $result    = sanitize($conn, $_POST['result']);
+    // Sirf digits nikalo aur format karo: 3-2-3
+    $raw = preg_replace('/\D/', '', $_POST['result']);
+    if (strlen($raw) !== 8) {
+        $msg = '❌ Invalid result format. 8 digits chahiye (e.g. 55996169)';
+    } else {
+    $result = substr($raw,0,3).'-'.substr($raw,3,2).'-'.substr($raw,5,3);
+    $result = $conn->real_escape_string($result);
 
     $conn->query("UPDATE markets SET result='$result' WHERE id=$market_id");
 
@@ -51,7 +57,8 @@ if (isset($_POST['declare'])) {
         $settled++;
     }
     $mkt_name = $conn->query("SELECT name FROM markets WHERE id=$market_id")->fetch_assoc()['name'];
-    $msg = "✅ <strong>$mkt_name</strong> — Result <strong>$result</strong> declare ho gaya! $settled bets settle hue, $won_count winners.";
+    $msg = "&#x2705; <strong>$mkt_name</strong> &mdash; Result <strong>$result</strong> declare ho gaya! $settled bets settle hue, $won_count winners.";
+    } // end else
 }
 
 $markets        = $conn->query("SELECT * FROM markets WHERE status='active' ORDER BY id");
@@ -150,13 +157,44 @@ tr:hover td{background:#fdfbff;}
       </div>
       <div class="dfg">
         <label><i class="fas fa-hashtag"></i> Result Enter Karein</label>
-        <input type="text" name="result" required placeholder="e.g. 559-96-169" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}">
-        <small>Format: 3digit - 2digit - 3digit</small>
+        <input type="text" name="result" id="result_inp" required placeholder="e.g. 559-96-169" maxlength="11" autocomplete="off" oninput="formatResult(this)">
+        <small>Format: 3digit-2digit-3digit &nbsp;|&nbsp; Auto-format hoga</small>
+        <div id="result_preview" style="margin-top:8px;display:none;">
+          <span style="color:rgba(255,255,255,.5);font-size:11px;">Preview: </span>
+          <span id="preview_val" style="color:#ffcc00;font-size:16px;font-weight:900;letter-spacing:2px;font-family:monospace;"></span>
+        </div>
       </div>
-      <button type="submit" name="declare" class="declare-btn">
-        <i class="fas fa-flag-checkered"></i> Declare & Settle Bets
+      <button type="submit" name="declare" class="declare-btn" id="declare_btn" disabled style="opacity:.5;cursor:not-allowed;">
+        <i class="fas fa-flag-checkered"></i> Declare &amp; Settle Bets
       </button>
     </form>
+    <script>
+    function formatResult(inp) {
+      // Sirf digits rakhو, baaki hata do
+      var digits = inp.value.replace(/\D/g,'');
+      var formatted = '';
+      if (digits.length > 0) formatted = digits.substring(0,3);
+      if (digits.length > 3) formatted += '-' + digits.substring(3,5);
+      if (digits.length > 5) formatted += '-' + digits.substring(5,8);
+      inp.value = formatted;
+
+      var preview = document.getElementById('result_preview');
+      var btn = document.getElementById('declare_btn');
+      // Valid = 3+2+3 = 8 digits
+      if (digits.length === 8) {
+        document.getElementById('preview_val').textContent = formatted;
+        preview.style.display = 'block';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+      } else {
+        preview.style.display = 'none';
+        btn.disabled = true;
+        btn.style.opacity = '.5';
+        btn.style.cursor = 'not-allowed';
+      }
+    }
+    </script>
   </div>
 
   <!-- TODAY MARKETS TABLE -->

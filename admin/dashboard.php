@@ -10,6 +10,8 @@ $total_win_amount  = $conn->query("SELECT COALESCE(SUM(win_amount),0) as c FROM 
 $pending_bets      = $conn->query("SELECT COUNT(*) as c FROM bets WHERE status='pending'")->fetch_assoc()['c'];
 $total_deposits    = $conn->query("SELECT COALESCE(SUM(amount),0) as c FROM transactions WHERE type='deposit' AND DATE(created_at)=CURDATE()")->fetch_assoc()['c'];
 $total_markets     = $conn->query("SELECT COUNT(*) as c FROM markets WHERE status='active'")->fetch_assoc()['c'];
+$total_withdrawals  = $conn->query("SELECT COALESCE(SUM(amount),0) as c FROM transactions WHERE type='withdraw' AND DATE(created_at)=CURDATE()")->fetch_assoc()['c'];
+$total_wallet      = $conn->query("SELECT COALESCE(SUM(balance),0) as c FROM users")->fetch_assoc()['c'];
 $profit            = $total_bet_amount - $total_win_amount;
 
 $recent_bets = $conn->query("SELECT b.*,u.name,u.mobile,m.name as market_name FROM bets b JOIN users u ON b.user_id=u.id JOIN markets m ON b.market_id=m.id ORDER BY b.created_at DESC LIMIT 8");
@@ -140,6 +142,22 @@ tr:hover td{background:#fafafa;}
       <h2><?= $total_markets ?></h2>
       <p>Active Markets</p>
       <div class="trend up"><i class="fas fa-circle" style="font-size:7px"></i> Running</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-pink"><i class="fas fa-money-bill-wave"></i></div>
+    <div class="stat-info">
+      <h2>&#8377;<?= number_format($total_withdrawals,0) ?></h2>
+      <p>Today's Withdrawals</p>
+      <div class="trend down"><i class="fas fa-arrow-down" style="font-size:9px"></i> Paid today</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-teal" style="background:#e0f7f7;color:#00838f;"><i class="fas fa-piggy-bank"></i></div>
+    <div class="stat-info">
+      <h2>&#8377;<?= number_format($total_wallet,0) ?></h2>
+      <p>Total Wallet Balance</p>
+      <div class="trend up"><i class="fas fa-users" style="font-size:9px"></i> All users</div>
     </div>
   </div>
 </div>

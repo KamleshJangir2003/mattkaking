@@ -12,19 +12,20 @@ if ($status_filter) $where .= " AND b.status='$status_filter'";
 
 if (isset($_GET['approve'])) {
     $bid = (int)$_GET['approve'];
-    $bet = $conn->query("SELECT * FROM bets WHERE id=$bid")->fetch_assoc();
-    if ($bet && $bet['status'] === 'pending') {
-        $ratio   = getWinRatio($conn, $bet['bet_type']);
-        $win_amt = $bet['amount'] * $ratio;
-        $conn->query("UPDATE bets SET status='won', win_amount=$win_amt WHERE id=$bid");
-        updateBalance($conn, $bet['user_id'], $win_amt, 'add');
-        addTransaction($conn, $bet['user_id'], 'win', $win_amt, "Won bet #$bid (manual approve)");
-    }
-    header("Location: bets.php?date=$date&market=$market_filter&status=$status_filter"); exit;
+    // Sirf confirm karo ki bet valid hai — won/lost result declare pe decide hoga
+    $conn->query("UPDATE bets SET status='pending' WHERE id=$bid AND status='pending'");
+    // No change needed, bet already pending hai — result.php pe won/lost hoga
+    header("Location: bets.php?date=$date&market=$market_filter&status=$status_filter&approved=$bid"); exit;
 }
 if (isset($_GET['reject'])) {
     $bid = (int)$_GET['reject'];
-    $conn->query("UPDATE bets SET status='lost' WHERE id=$bid AND status='pending'");
+    // Reject = bet cancel, amount wapas user ko
+    $bet = $conn->query("SELECT * FROM bets WHERE id=$bid AND status='pending'")->fetch_assoc();
+    if ($bet) {
+        $conn->query("UPDATE bets SET status='cancelled' WHERE id=$bid");
+        updateBalance($conn, $bet['user_id'], $bet['amount'], 'add');
+        addTransaction($conn, $bet['user_id'], 'deposit', $bet['amount'], "Bet #$bid cancelled - refund");
+    }
     header("Location: bets.php?date=$date&market=$market_filter&status=$status_filter"); exit;
 }
 
@@ -71,6 +72,7 @@ tr:hover td{background:#fdfbff;}
 .badge-won{background:#d4f5e9;color:#00875a;}
 .badge-lost{background:#fde8ef;color:#c0003c;}
 .badge-pending{background:#fff3cd;color:#856404;}
+.badge-cancelled{background:#e9ecef;color:#6c757d;}
 .badge-open{background:#e3f2fd;color:#0277bd;}
 .badge-close{background:#fce4ec;color:#880e4f;}
 .type-badge{padding:3px 9px;border-radius:6px;font-size:10px;font-weight:800;background:#f0e8ff;color:#6c2d7e;letter-spacing:.3px;}
@@ -182,9 +184,10 @@ tr:hover td{background:#fdfbff;}
       <td><span class="badge badge-<?= $b['session'] ?>"><?= strtoupper($b['session']) ?></span></td>
       <td><span class="badge badge-<?= $b['status'] ?>">
         <?php
-          if($b['status']==='won')     echo '✅ WON';
-          elseif($b['status']==='lost') echo '❌ LOST';
-          else                          echo '⏳ PENDING';
+          if($b['status']==='won')           echo '&#x2705; WON';
+          elseif($b['status']==='lost')       echo '&#x274C; LOST';
+          elseif($b['status']==='cancelled')  echo '&#x1F6AB; CANCELLED';
+          else                                echo '&#x23F3; PENDING';
         ?>
       </span></td>
       <td>
@@ -198,8 +201,7 @@ tr:hover td{background:#fdfbff;}
       <td>
         <?php if($b['status']==='pending'): ?>
         <div style="display:flex;gap:5px;">
-          <a href="?date=<?= $date ?>&market=<?= $market_filter ?>&status=<?= $status_filter ?>&approve=<?= $b['id'] ?>" class="action-btn btn-approve" onclick="return confirm('Approve karein?')"><i class="fas fa-check"></i> Approve</a>
-          <a href="?date=<?= $date ?>&market=<?= $market_filter ?>&status=<?= $status_filter ?>&reject=<?= $b['id'] ?>" class="action-btn btn-reject" onclick="return confirm('Reject karein?')"><i class="fas fa-times"></i> Reject</a>
+          <a href="?date=<?= $date ?>&market=<?= $market_filter ?>&status=<?= $status_filter ?>&reject=<?= $b['id'] ?>" class="action-btn btn-reject" onclick="return confirm('Bet cancel karein aur amount refund karein?')"><i class="fas fa-times"></i> Cancel</a>
         </div>
         <?php else: ?>
           <span style="color:#ddd;font-size:12px;">—</span>

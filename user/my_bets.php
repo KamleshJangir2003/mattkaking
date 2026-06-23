@@ -64,28 +64,30 @@ include 'header.php';
   <?php else: ?>
 
   <?php while($b = $bets->fetch_assoc()): ?>
-  <div style="border:1px solid #f0e0f0;border-radius:10px;padding:12px;margin-bottom:8px;background:<?= $b['status']=='won'?'#f0fff4':($b['status']=='lost'?'#fff5f5':'#fffde7') ?>;">
+  <div style="border:1px solid #f0e0f0;border-radius:10px;padding:12px;margin-bottom:8px;background:<?= $b['status']=='won'?'#f0fff4':($b['status']=='lost'?'#fff5f5':($b['status']=='cancelled'?'#f8f9fa':'#fffde7')) ?>;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
       <div>
         <div style="font-size:11px;color:#888;font-style:normal;"><?= htmlspecialchars($b['market_name']) ?></div>
-        <div style="font-size:13px;color:#7c4066;"><?= $type_labels[$b['bet_type']] ?? strtoupper($b['bet_type']) ?> &nbsp;·&nbsp; <?= strtoupper($b['session']) ?></div>
+        <div style="font-size:13px;color:#7c4066;"><?= $type_labels[$b['bet_type']] ?? strtoupper($b['bet_type']) ?> &nbsp;&middot;&nbsp; <?= strtoupper($b['session']) ?></div>
       </div>
       <span class="badge badge-<?= $b['status'] ?>"><?= strtoupper($b['status']) ?></span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;flex-wrap:wrap;gap:6px;">
       <div style="font-size:26px;font-weight:900;color:#1a0030;"><?= $b['number'] ?></div>
       <div style="text-align:right;font-style:normal;">
-        <div style="font-size:12px;color:#555;">Bet: <strong>₹<?= number_format($b['amount'],2) ?></strong></div>
+        <div style="font-size:12px;color:#555;">Bet: <strong>&#x20B9;<?= number_format($b['amount'],2) ?></strong></div>
         <?php if ($b['status']=='won'): ?>
-        <div style="font-size:14px;color:#28a745;font-weight:700;">Won: ₹<?= number_format($b['win_amount'],2) ?> 🎉</div>
+        <div style="font-size:14px;color:#28a745;font-weight:700;">Won: &#x20B9;<?= number_format($b['win_amount'],2) ?> &#x1F389;</div>
         <?php elseif($b['status']=='lost'): ?>
         <div style="font-size:12px;color:#999;">Better luck next time!</div>
+        <?php elseif($b['status']=='cancelled'): ?>
+        <div style="font-size:12px;color:#6c757d;">&#x20B9;<?= number_format($b['amount'],2) ?> refund ho gaya</div>
         <?php else: ?>
         <div style="font-size:11px;color:#856404;">Result awaited...</div>
         <?php endif; ?>
       </div>
     </div>
-    <div style="font-size:10px;color:#bbb;margin-top:5px;font-style:normal;text-align:right;">#<?= $b['id'] ?> · <?= date('h:i A', strtotime($b['created_at'])) ?></div>
+    <div style="font-size:10px;color:#bbb;margin-top:5px;font-style:normal;text-align:right;">#<?= $b['id'] ?> &middot; <?= date('h:i A', strtotime($b['created_at'])) ?></div>
   </div>
   <?php endwhile; ?>
 
