@@ -8,8 +8,8 @@ if (isset($_POST['add'])) {
     $slug  = sanitize($conn, strtolower(str_replace(' ', '-', trim($_POST['name']))));
     $open  = sanitize($conn, $_POST['open_time']);
     $close = sanitize($conn, $_POST['close_time']);
-    $conn->query("INSERT INTO markets (name,slug,open_time,close_time) VALUES ('$name','$slug','$open','$close')");
-    $msg = "Market <strong>$name</strong> successfully add ho gaya!";
+    $conn->query("INSERT INTO markets (name,slug,open_time,close_time) VALUES ('$name','$slug','$open','$close') ON DUPLICATE KEY UPDATE name='$name',open_time='$open',close_time='$close'");
+    $msg = "Market <strong>$name</strong> successfully add/update ho gaya!";
 }
 
 if (isset($_POST['edit'])) {
@@ -88,6 +88,7 @@ tr:hover td{background:#fdfbff;}
 .btn-del{background:#fde8ef;color:#c0003c;}
 
 .alert-toast{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;margin-bottom:20px;font-size:13px;font-weight:600;background:#e8faf4;color:#00875a;border:1.5px solid #b2dfdb;}
+.alert-toast.error{background:#fde8ef;color:#c0003c;border-color:#f5c6d0;}
 
 /* EDIT MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,5,30,.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
@@ -109,7 +110,7 @@ tr:hover td{background:#fdfbff;}
 </style>
 
 <?php if($msg): ?>
-<div class="alert-toast"><i class="fas fa-check-circle"></i><span><?= $msg ?></span></div>
+<div class="alert-toast <?= $msg_type === 'error' ? 'error' : '' ?>"><i class="fas fa-<?= $msg_type === 'error' ? 'exclamation-circle' : 'check-circle' ?>"></i><span><?= $msg ?></span></div>
 <?php endif; ?>
 
 <!-- STATS -->

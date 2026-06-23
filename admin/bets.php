@@ -10,6 +10,24 @@ $where = "WHERE b.bet_date='$date'";
 if ($market_filter) $where .= " AND b.market_id=$market_filter";
 if ($status_filter) $where .= " AND b.status='$status_filter'";
 
+if (isset($_GET['approve'])) {
+    $bid = (int)$_GET['approve'];
+    $bet = $conn->query("SELECT * FROM bets WHERE id=$bid")->fetch_assoc();
+    if ($bet && $bet['status'] === 'pending') {
+        $ratio   = getWinRatio($conn, $bet['bet_type']);
+        $win_amt = $bet['amount'] * $ratio;
+        $conn->query("UPDATE bets SET status='won', win_amount=$win_amt WHERE id=$bid");
+        updateBalance($conn, $bet['user_id'], $win_amt, 'add');
+        addTransaction($conn, $bet['user_id'], 'win', $win_amt, "Won bet #$bid (manual approve)");
+    }
+    header("Location: bets.php?date=$date&market=$market_filter&status=$status_filter"); exit;
+}
+if (isset($_GET['reject'])) {
+    $bid = (int)$_GET['reject'];
+    $conn->query("UPDATE bets SET status='lost' WHERE id=$bid AND status='pending'");
+    header("Location: bets.php?date=$date&market=$market_filter&status=$status_filter"); exit;
+}
+
 $bets    = $conn->query("SELECT b.*,u.name,u.mobile,m.name as market_name FROM bets b JOIN users u ON b.user_id=u.id JOIN markets m ON b.market_id=m.id $where ORDER BY b.created_at DESC");
 $markets = $conn->query("SELECT id,name FROM markets ORDER BY name");
 $stats   = $conn->query("SELECT COUNT(*) as total, COALESCE(SUM(amount),0) as total_amt, COALESCE(SUM(CASE WHEN status='won' THEN win_amount ELSE 0 END),0) as win_amt, COALESCE(SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END),0) as pending_cnt FROM bets b $where")->fetch_assoc();
@@ -60,6 +78,11 @@ tr:hover td{background:#fdfbff;}
 .empty-state{text-align:center;padding:50px 20px;color:#bbb;}
 .empty-state i{font-size:40px;display:block;margin-bottom:12px;color:#ddd;}
 .empty-state p{font-size:14px;font-weight:700;}
+.action-btn{padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:.15s;white-space:nowrap;}
+.btn-approve{background:#d4f5e9;color:#00875a;}
+.btn-approve:hover{background:#00875a;color:#fff;}
+.btn-reject{background:#fde8ef;color:#c0003c;}
+.btn-reject:hover{background:#c0003c;color:#fff;}
 </style>
 
 <!-- STATS -->
@@ -131,7 +154,7 @@ tr:hover td{background:#fdfbff;}
   <div style="overflow-x:auto;">
   <table>
     <thead>
-      <tr><th>#</th><th>User</th><th>Market</th><th>Type</th><th>Number</th><th>Amount</th><th>Session</th><th>Status</th><th>Win Amt</th><th>Time</th></tr>
+      <tr><th>#</th><th>User</th><th>Market</th><th>Type</th><th>Number</th><th>Amount</th><th>Session</th><th>Status</th><th>Win Amt</th><th>Time</th><th>Action</th></tr>
     </thead>
     <tbody>
     <?php
@@ -172,6 +195,16 @@ tr:hover td{background:#fdfbff;}
         <?php endif; ?>
       </td>
       <td style="font-size:11px;color:#888;white-space:nowrap;"><?= date('h:i A', strtotime($b['created_at'])) ?></td>
+      <td>
+        <?php if($b['status']==='pending'): ?>
+        <div style="display:flex;gap:5px;">
+          <a href="?date=<?= $date ?>&market=<?= $market_filter ?>&status=<?= $status_filter ?>&approve=<?= $b['id'] ?>" class="action-btn btn-approve" onclick="return confirm('Approve karein?')"><i class="fas fa-check"></i> Approve</a>
+          <a href="?date=<?= $date ?>&market=<?= $market_filter ?>&status=<?= $status_filter ?>&reject=<?= $b['id'] ?>" class="action-btn btn-reject" onclick="return confirm('Reject karein?')"><i class="fas fa-times"></i> Reject</a>
+        </div>
+        <?php else: ?>
+          <span style="color:#ddd;font-size:12px;">—</span>
+        <?php endif; ?>
+      </td>
     </tr>
     <?php endwhile; ?>
     <?php if($count === 0): ?>

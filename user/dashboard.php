@@ -46,6 +46,58 @@ include 'header.php';
   <?php endwhile; ?>
 </div>
 
+<!-- RECENT BETS -->
+<?php
+$recent_bets = $conn->query("SELECT b.*,m.name as market_name FROM bets b JOIN markets m ON b.market_id=m.id WHERE b.user_id=$uid ORDER BY b.created_at DESC LIMIT 10");
+?>
+<div class="card">
+  <div class="card-title">🎲 My Recent Bets</div>
+  <?php if($recent_bets->num_rows === 0): ?>
+    <p style="text-align:center;color:#aaa;padding:20px;">Koi bet nahi mili abhi tak</p>
+  <?php else: ?>
+  <div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead>
+      <tr style="background:#f8f5ff;">
+        <th style="padding:9px 10px;text-align:left;color:#6c2d7e;font-size:11px;">MARKET</th>
+        <th style="padding:9px 10px;text-align:left;color:#6c2d7e;font-size:11px;">TYPE</th>
+        <th style="padding:9px 10px;text-align:left;color:#6c2d7e;font-size:11px;">NUMBER</th>
+        <th style="padding:9px 10px;text-align:left;color:#6c2d7e;font-size:11px;">AMOUNT</th>
+        <th style="padding:9px 10px;text-align:left;color:#6c2d7e;font-size:11px;">STATUS</th>
+        <th style="padding:9px 10px;text-align:left;color:#6c2d7e;font-size:11px;">WIN AMT</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php while($b = $recent_bets->fetch_assoc()): ?>
+    <tr style="border-bottom:1px solid #f5f5f5;">
+      <td style="padding:10px;"><strong style="font-size:12px;"><?= htmlspecialchars($b['market_name']) ?></strong><br><span style="font-size:10px;color:#aaa;"><?= $b['bet_date'] ?></span></td>
+      <td style="padding:10px;"><span style="background:#f0e8ff;color:#6c2d7e;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;"><?= strtoupper(str_replace('_',' ',$b['bet_type'])) ?></span></td>
+      <td style="padding:10px;"><strong style="font-size:16px;letter-spacing:1px;"><?= $b['number'] ?></strong></td>
+      <td style="padding:10px;"><strong>₹<?= number_format($b['amount'],0) ?></strong></td>
+      <td style="padding:10px;">
+        <?php if($b['status']==='won'): ?>
+          <span style="background:#d4f5e9;color:#00875a;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;">✅ WON</span>
+        <?php elseif($b['status']==='lost'): ?>
+          <span style="background:#fde8ef;color:#c0003c;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;">❌ LOST</span>
+        <?php else: ?>
+          <span style="background:#fff3cd;color:#856404;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;">⏳ PENDING</span>
+        <?php endif; ?>
+      </td>
+      <td style="padding:10px;">
+        <?php if($b['win_amount'] > 0): ?>
+          <strong style="color:#00b894;">₹<?= number_format($b['win_amount'],0) ?></strong>
+        <?php else: ?>
+          <span style="color:#ddd;">—</span>
+        <?php endif; ?>
+      </td>
+    </tr>
+    <?php endwhile; ?>
+    </tbody>
+  </table>
+  </div>
+  <?php endif; ?>
+</div>
+
 <!-- NOTICE BOX -->
 <div style="background:#fff3cd;border:2px solid #ff9800;border-radius:12px;padding:14px;margin-bottom:12px;font-style:normal;">
   <div style="color:#856404;font-size:13px;line-height:1.6;">
